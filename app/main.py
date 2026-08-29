@@ -16,29 +16,32 @@ app = FastAPI(
     version="0.1.0",
 )
 
-
 @app.middleware("http")
 async def record_request_metrics(request: Request, call_next):
     start_time = time.perf_counter()
 
-    response = await call_next(request)
+    try:
+        response = await call_next(request)
+        status = str(response.status_code)
+    except Exception:
+        status = "500"
+        raise
+    finally:
+        duration = time.perf_counter() - start_time
 
-    duration = time.perf_counter() - start_time
+        endpoint = request.url.path
+        method = request.method
 
-    endpoint = request.url.path
-    method = request.method
-    status = str(response.status_code)
+        http_requests_total.labels(
+            method=method,
+            endpoint=endpoint,
+            status=status,
+        ).inc()
 
-    http_requests_total.labels(
-        method=method,
-        endpoint=endpoint,
-        status=status,
-    ).inc()
-
-    http_request_duration.labels(
-        method=method,
-        endpoint=endpoint,
-    ).observe(duration)
+        http_request_duration.labels(
+            method=method,
+            endpoint=endpoint,
+        ).observe(duration)
 
     return response
 
@@ -55,3 +58,7 @@ def root():
         "version": "0.1.0",
         "status": "running",
     }
+
+@app.get("/test-error")
+def test_error():
+    raise RuntimeError("Test error")
