@@ -6,6 +6,8 @@ from app.health import router as health_router
 from app.metrics import (
     http_request_duration,
     http_requests_total,
+)
+from app.metrics import (
     router as metrics_router,
 )
 from app.system import router as system_router
