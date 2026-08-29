@@ -35,3 +35,6 @@ jobs:
 
       - name: Run Bandit
         run: bandit -r app
+
+      - name: Build Docker image
+        run: docker build -t cloudpulse:${{ github.sha }} .
