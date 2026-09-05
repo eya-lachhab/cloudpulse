@@ -8,6 +8,10 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   test:
     name: Test & Quality Checks
@@ -36,5 +40,18 @@ jobs:
       - name: Run Bandit
         run: bandit -r app
 
-      - name: Build Docker image
-        run: docker build -t cloudpulse:${{ github.sha }} .
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/eya-lachhab/cloudpulse:latest
+            ghcr.io/eya-lachhab/cloudpulse:${{ github.sha }}
