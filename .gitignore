@@ -7,3 +7,8 @@ __pycache__/
 .env
 .idea/
 .vscode/
+.terraform/
+.terraform.lock.hcl.bak
+*.tfstate
+*.tfstate.backup
+schema.json
